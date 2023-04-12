@@ -14,10 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-import static com.planning_system.services.messages.ServiceErrorMessages.NO_NAME_ENTERED;
+import static com.planning_system.services.messages.ServiceErrorMessages.NO_TASK_NAME_ENTERED;
 import static com.planning_system.services.messages.ServiceErrorMessages.TASK_NOT_FOUND;
+import static com.planning_system.services.messages.ServiceErrorMessages.USER_NOT_FOUND;
 
 /**
  * The class responsible for CRUD operations with the Tasks.
@@ -38,7 +38,7 @@ public class TaskService {
 
     public Task createTask(Task task) {
         if (Objects.isNull(task.getName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_NAME_ENTERED);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_TASK_NAME_ENTERED);
         }
         if (Objects.isNull(task.getDescription())) {
             task.setDescription("default description");
@@ -55,30 +55,25 @@ public class TaskService {
     }
 
     public Task assignTaskToUser(int taskId, int userId) {
-        Optional<Task> optionalTask = taskRepository.findById(taskId);
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Task task = taskRepository.findById(taskId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,USER_NOT_FOUND));
 
-        if (optionalTask.isPresent() && optionalUser.isPresent()) {
-            Task task = optionalTask.get();
-            User user = optionalUser.get();
-
-            task.setUser(user);
-            return taskRepository.save(task);
-        } else {
-            throw new IllegalArgumentException("Task or user not found.");
-        }
+        task.setUser(user);
+        return taskRepository.save(task);
     }
 
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
 
-    public Task getTask(Integer id) {
+    public Task getTask(int id) {
         return taskRepository.findById(id)
                          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND));
     }
 
-    public Task updateTask(Integer id, Task task) {
+    public Task updateTask(int id, Task task) {
         Task taskToUpdate = getTask(id);
         if (Objects.nonNull(task.getStatus())) {
             taskToUpdate.setStatus(task.getStatus());
@@ -90,7 +85,7 @@ public class TaskService {
         return taskRepository.save(taskToUpdate);
     }
 
-    public Task deleteTask(Integer id) {
+    public Task deleteTask(int id) {
         Task task = getTask(id);
         taskRepository.delete(task);
         return task;

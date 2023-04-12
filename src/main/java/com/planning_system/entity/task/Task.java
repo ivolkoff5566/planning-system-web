@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -31,25 +32,17 @@ public class Task {
      @Id
      @GeneratedValue(strategy = GenerationType.IDENTITY)
      private int id;
-
      private Instant date;
-
      private String name;
-
      private String description;
-
      @Enumerated(EnumType.STRING)
      private TaskStatus status;
-
      @Enumerated(EnumType.STRING)
      private TaskPriority priority;
-
      @ManyToOne
      @JsonBackReference
-     @JoinColumn(name = "user_id",
-                 referencedColumnName = "id")
+     @JoinColumn(name = "user_id")
      private User user;
-
      @Column(name = "is_rejected")
      private boolean isRejected;
 }

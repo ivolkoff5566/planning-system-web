@@ -52,6 +52,11 @@ public class TaskCommandService {
         return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(taskResult);
     }
 
+    public TaskResponseDTO assignTaskToUser(int taskId, int userId) {
+        var task = taskService.assignTaskToUser(taskId, userId);
+        return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(task);
+    }
+
     /**
      * Method returns all the {@link Task} that exist in the system. The returned Tasks can be sorted by date, status,
      * priority or id. By default, sorted by ID. It is possible to use reverse sort.
@@ -117,9 +122,5 @@ public class TaskCommandService {
     public TaskResponseDTO deleteTask(int id) {
         var task = taskService.deleteTask(id);
         return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(task);
-    }
-
-    public Task assignTaskToUser(int taskId, int userId) {
-        return taskService.assignTaskToUser(taskId, userId);
     }
 }

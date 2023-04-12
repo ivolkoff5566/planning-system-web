@@ -1,8 +1,8 @@
 package com.planning_system.controller.task.dto;
 
+import com.planning_system.controller.user.dto.BasicUserResponseDTO;
 import com.planning_system.entity.task.TaskPriority;
 import com.planning_system.entity.task.TaskStatus;
-import com.planning_system.entity.user.User;
 import lombok.Builder;
 import lombok.Value;
 
@@ -17,5 +17,5 @@ public class TaskResponseDTO {
     String description;
     TaskStatus status;
     TaskPriority priority;
-    User user;
+    BasicUserResponseDTO user;
 }

@@ -34,14 +34,10 @@ public class TaskController {
         return taskCommandService.createTask(taskRequestDTO);
     }
 
-    @PostMapping("/{taskId}/assign/{userId}")
-    public ResponseEntity<String> assignTaskToUser(@PathVariable int taskId, @PathVariable int userId) {
-        try {
-            taskCommandService.assignTaskToUser(taskId, userId);
-            return ResponseEntity.ok("Task assigned to user successfully.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping("/{taskId}/user/{userId}")
+    public TaskResponseDTO assignTaskToUser(@PathVariable int taskId,
+                                            @PathVariable int userId) {
+        return taskCommandService.assignTaskToUser(taskId, userId);
     }
 
     @GetMapping("/{id}")
