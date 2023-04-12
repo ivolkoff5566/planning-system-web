@@ -1,6 +1,7 @@
 package com.planning_system.services.sync;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 public class TaskSyncJob implements Job {

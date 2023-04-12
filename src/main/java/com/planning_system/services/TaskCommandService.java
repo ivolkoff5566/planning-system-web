@@ -1,10 +1,15 @@
 package com.planning_system.services;
 
-import com.planning_system.entity.Task;
-import com.planning_system.handlers.commands.Command;
-import com.planning_system.handlers.commands.OptionType;
-import com.planning_system.handlers.response.Response;
+import com.planning_system.controller.task.dto.TaskRequestDTO;
+import com.planning_system.controller.task.dto.TaskResponseDTO;
+import com.planning_system.entity.task.Task;
+import com.planning_system.services.utility.TaskRequestDTOToTaskMapper;
+import com.planning_system.services.utility.TaskToTaskResponseDTOMapper;
 import com.planning_system.services.utility.TaskUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,135 +17,109 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.planning_system.handlers.commands.OptionType.REJECTED_TASK;
+import static com.planning_system.controller.task.TaskParams.REJECTED_TASK;
 import static com.planning_system.services.messages.ServiceErrorMessages.ERROR;
-import static com.planning_system.services.messages.ServiceMessages.GET_ALL_REJECTED_TASKS;
-import static com.planning_system.services.messages.ServiceMessages.GET_ALL_TASKS;
-import static com.planning_system.services.messages.ServiceMessages.GET_TASK;
-import static com.planning_system.services.messages.ServiceMessages.NO_TASKS_YET;
-import static com.planning_system.services.messages.ServiceMessages.TASK_CREATED;
-import static com.planning_system.services.messages.ServiceMessages.TASK_DELETED;
-import static com.planning_system.services.messages.ServiceMessages.TASK_UPDATED;
-import static com.planning_system.services.utility.TaskUtil.parseId;
+import static com.planning_system.services.messages.ServiceErrorMessages.TASK_NOT_FOUND;
 
 /**
- * The class contains main business logic, responsible for {@link Task} processing and building {@link Response}.
+ * The class contains main business logic, responsible for {@link Task} processing
+ * and preparing data for response (filtering, sorting etc.)
  */
+@Service
 public class TaskCommandService {
 
     private final TaskService taskService;
-    private final RejectedTaskService rejectedTaskService;
+    private final TaskToTaskResponseDTOMapper taskToTaskResponseDTOMapper;
+    private final TaskRequestDTOToTaskMapper taskRequestDTOToTaskMapper;
 
+    @Autowired
     public TaskCommandService(final TaskService taskService,
-                              final RejectedTaskService rejectedTaskService) {
+                              final TaskToTaskResponseDTOMapper taskToTaskResponseDTOMapper,
+                              final TaskRequestDTOToTaskMapper taskRequestDTOToTaskMapper) {
         this.taskService = taskService;
-        this.rejectedTaskService = rejectedTaskService;
+        this.taskToTaskResponseDTOMapper = taskToTaskResponseDTOMapper;
+        this.taskRequestDTOToTaskMapper = taskRequestDTOToTaskMapper;
     }
 
     /**
      * Method creates a new {@link Task}
-     * @throws RuntimeException if the {@link Command} was not processed successfully
-     * @param task {@link Task} that will be created.
-     * @return {@link Response} that contains created Task and Message
+     * @param taskRequestDTO {@link TaskRequestDTO} that will be used to create a Task.
+     * @return {@link TaskResponseDTO}
      */
-    public Response<Task> createTask(Task task) {
-
-        Task taskResult = taskService.createTask(task);
-        return Response.<Task>builder()
-                       .message(TASK_CREATED)
-                       .data(taskResult)
-                       .build();
+    public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO) {
+        var task = taskRequestDTOToTaskMapper.mapToTask(taskRequestDTO);
+        var taskResult = taskService.createTask(task);
+        return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(taskResult);
     }
 
     /**
      * Method returns all the {@link Task} that exist in the system. The returned Tasks can be sorted by date, status,
      * priority or id. By default, sorted by ID. It is possible to use reverse sort.
-     * @throws RuntimeException if the options were not processed successfully.
-     * @param options contain options with sorted type and/or rejected tasks request.
-     * @return {@link Response} that contains Tasks and Message
+     *
+     * @param params contain params with sorted type and/or rejected tasks request.
+     * @return {@link List<TaskResponseDTO>}
      */
-    public Response<List<Task>> getAllTask(Map<OptionType, String> options) {
-        Comparator<Task> comp = TaskUtil.getTaskComparatorFromOptions(options);
+    public List<TaskResponseDTO> getAllTasks(Map<String, String> params) {
+        Comparator<Task> comp = TaskUtil.getTaskComparatorFromParams(params);
 
-        if (!Objects.isNull(options.get(REJECTED_TASK))) {
-            if (!options.get(REJECTED_TASK).equals(Boolean.TRUE.toString())) {
-                throw new RuntimeException(ERROR);
-            } else {
-                List<Task> allRejectedTasks = rejectedTaskService.getAllRejectedTasks()
-                                                                 .stream()
-                                                                 .sorted(comp)
-                                                                 .collect(Collectors.toList());
+        if (!Objects.isNull(params.get(REJECTED_TASK))) {
+            if (!params.get(REJECTED_TASK).equals(Boolean.TRUE.toString())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ERROR);
+            }
 
-                if (allRejectedTasks.isEmpty()) {
-                    return Response.<List<Task>>builder()
-                            .message(NO_TASKS_YET)
-                            .build();
-                }
-                return Response.<List<Task>>builder()
-                               .message(GET_ALL_REJECTED_TASKS)
-                               .data(allRejectedTasks)
-                               .build();
-            }
-        } else {
-            List<Task> allTasks = taskService.getAllTasks()
-                                             .stream()
-                                             .sorted(comp)
-                                             .collect(Collectors.toList());
-            if (allTasks.isEmpty()) {
-                return Response.<List<Task>>builder()
-                               .message(NO_TASKS_YET)
-                               .build();
-            }
-            return Response.<List<Task>>builder()
-                           .message(GET_ALL_TASKS)
-                           .data(allTasks)
-                           .build();
+            return taskService.getAllTasks()
+                              .stream()
+                              .filter(Task::isRejected)
+                              .sorted(comp)
+                              .map(taskToTaskResponseDTOMapper::mapToTaskResponseDTO)
+                              .collect(Collectors.toList());
         }
+        return taskService.getAllTasks()
+                          .stream()
+                          .sorted(comp)
+                          .filter(task -> !task.isRejected())
+                          .map(taskToTaskResponseDTOMapper::mapToTaskResponseDTO)
+                          .collect(Collectors.toList());
     }
 
     /**
-     * Method returns the {@link Task} by id
-     * @throws RuntimeException if the Task was not found or the id was not recognized
+     * Method returns the {@link Task} by id.
+     * If the Task is rejected, TASK_NOT_FOUND exception will be thrown along with 404 status code
      * @param id requested Task id.
-     * @return {@link Response} that contains Task and Message
+     * @return {@link TaskResponseDTO}
      */
-    public Response<Task> getTask(String id) {
-        int correctId = parseId(id);
-        Task task = taskService.getTask(correctId);
-
-        return Response.<Task>builder()
-                        .message(GET_TASK)
-                        .data(task)
-                        .build();
+    public TaskResponseDTO getTask(int id) {
+        var task = taskService.getTask(id);
+        if (task.isRejected()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND);
+        }
+        return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(task);
     }
 
     /**
      * Method updates the {@link Task}
-     * @throws RuntimeException if user passes invalid data. The possible reasons for errors are
-     * unrecognized id and/or invalid fields to be updated. By design user can update only description or status.
-     * @param task {@link Task} that contains id and fields to be updated.
-     * @return {@link Response} that contains updated Task and Message
+     * By design user can update only description or status.
+     * @param id of the task that will be updated
+     * @param taskRequestDTO {@link TaskRequestDTO} that contains fields to be updated
+     * @return {@link TaskResponseDTO}
      */
-    public Response<Task> updateTask(Task task) {
-        return Response.<Task>builder()
-                        .message(TASK_UPDATED)
-                        .data(taskService.updateTask(task))
-                        .build();
-
+    public TaskResponseDTO updateTask(int id, TaskRequestDTO taskRequestDTO) {
+        var taskToUpdate = taskRequestDTOToTaskMapper.mapToTask(taskRequestDTO);
+        var resultTask = taskService.updateTask(id, taskToUpdate);
+        return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(resultTask);
     }
 
     /**
      * Method deletes {@link Task}
-     * @throws RuntimeException if the Task was not found or the id was not parsed successfully, e.g. id was not a number
      * @param id Task id to be deleted
-     * @return {@link Response} that contains message and deleted Task
+     * @return {@link TaskResponseDTO}
      */
-    public Response<Task> deleteTask(String id) {
-        int correctId = parseId(id);
+    public TaskResponseDTO deleteTask(int id) {
+        var task = taskService.deleteTask(id);
+        return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(task);
+    }
 
-        return Response.<Task>builder()
-                       .message(TASK_DELETED)
-                       .data(taskService.deleteTask(correctId))
-                       .build();
+    public Task assignTaskToUser(int taskId, int userId) {
+        return taskService.assignTaskToUser(taskId, userId);
     }
 }

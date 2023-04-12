@@ -1,4 +1,4 @@
-package com.planning_system.entity;
+package com.planning_system.entity.task;
 
 public enum TaskPriority {
     HIGH(1),

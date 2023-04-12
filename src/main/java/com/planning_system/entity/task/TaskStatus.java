@@ -1,4 +1,4 @@
-package com.planning_system.entity;
+package com.planning_system.entity.task;
 
 public enum TaskStatus {
     TODO(1),

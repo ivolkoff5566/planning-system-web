@@ -1,39 +1,33 @@
 package com.planning_system.services.utility;
 
-import com.planning_system.entity.Task;
-import com.planning_system.entity.TaskPriority;
-import com.planning_system.entity.TaskStatus;
-import com.planning_system.handlers.commands.OptionType;
+import com.planning_system.entity.task.Task;
 
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.planning_system.handlers.commands.OptionType.ID;
-import static com.planning_system.handlers.commands.OptionType.REVERSE_SORT;
-import static com.planning_system.handlers.commands.OptionType.SORTED;
-import static com.planning_system.services.messages.ServiceErrorMessages.ID_NOT_NUMBER;
-import static com.planning_system.services.messages.ServiceErrorMessages.INVALID_PRIORITY;
+import static com.planning_system.controller.task.TaskParams.ID;
+import static com.planning_system.controller.task.TaskParams.REVERSE_SORT;
+import static com.planning_system.controller.task.TaskParams.SORTED_BY;
 import static com.planning_system.services.messages.ServiceErrorMessages.INVALID_SORTING_TYPE;
-import static com.planning_system.services.messages.ServiceErrorMessages.INVALID_STATUS;
 
 public class TaskUtil {
 
-    public static Comparator<Task> getTaskComparatorFromOptions(Map<OptionType, String> options) {
+    public static Comparator<Task> getTaskComparatorFromParams(Map<String, String> params) {
         Comparator<Task> comp;
-        if (!options.isEmpty() && !Objects.isNull(options.get(SORTED))) {
-            String reverseSorted = options.get(REVERSE_SORT);
+        if (!params.isEmpty() && !Objects.isNull(params.get(SORTED_BY))) {
+            String reverseSorted = params.get(REVERSE_SORT);
             if (!Objects.isNull(reverseSorted) && reverseSorted.equals(Boolean.TRUE.toString())) {
-                comp = getComparator(options.get(SORTED)).reversed();
+                comp = getComparator(params.get(SORTED_BY)).reversed();
             } else {
-                comp = getComparator(options.get(SORTED));
+                comp = getComparator(params.get(SORTED_BY));
             }
         } else {
-            String reverseSorted = options.get(REVERSE_SORT);
+            String reverseSorted = params.get(REVERSE_SORT);
             if (!Objects.isNull(reverseSorted) && reverseSorted.equals(Boolean.TRUE.toString())) {
-                comp = getComparator(ID.getOptionName()).reversed();
+                comp = getComparator(ID).reversed();
             } else {
-                comp = getComparator(ID.getOptionName());
+                comp = getComparator(ID);
             }
         }
 
@@ -60,29 +54,5 @@ public class TaskUtil {
         }
 
         return comparator;
-    }
-
-    public static int parseId(String id) {
-        try {
-            return Integer.parseInt(id);
-        } catch (Exception ex) {
-            throw new RuntimeException(ID_NOT_NUMBER);
-        }
-    }
-
-    public static TaskPriority stringToTaskPriority(String input) {
-        try {
-            return TaskPriority.valueOf(input.toUpperCase());
-        } catch (Exception ex) {
-            throw new RuntimeException(INVALID_PRIORITY);
-        }
-    }
-
-    public static TaskStatus stringToTaskStatus(String input) {
-        try {
-            return TaskStatus.valueOf(input.toUpperCase());
-        } catch (Exception ex) {
-            throw new RuntimeException(INVALID_STATUS);
-        }
     }
 }

@@ -1,21 +1,28 @@
 package com.planning_system.services.sync;
 
-import com.planning_system.config.ApplicationConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
-public class Scheduler {
+import javax.annotation.PreDestroy;
 
-    private final ApplicationConfig config;
-
-    private Scheduler(ApplicationConfig config) {
-       this.config = config;
+public class Scheduler implements ApplicationListener<ApplicationReadyEvent> {
+//
+//    private final Job job;
+//
+//    @Autowired
+//    public Scheduler(final TaskSyncJob job) {
+//        this.job = job;
+//    }
+//
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        //job.start();
     }
-
-    public static Scheduler createScheduler(ApplicationConfig config) {
-        return new Scheduler(config);
-    }
-
-    public void load() {
-        var job = RegisteredJobFactory.getJob(config);
-        job.start();
-    }
+//
+//    @PreDestroy
+//    public void stopSync() {
+//        job.stop();
+//    }
 }
