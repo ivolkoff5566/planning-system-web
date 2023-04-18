@@ -2,13 +2,13 @@ package com.planning_system.entity.task;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.planning_system.entity.user.User;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -25,7 +25,7 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "tasks")
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class Task {
 

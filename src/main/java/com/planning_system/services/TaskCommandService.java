@@ -3,6 +3,7 @@ package com.planning_system.services;
 import com.planning_system.controller.task.dto.TaskRequestDTO;
 import com.planning_system.controller.task.dto.TaskResponseDTO;
 import com.planning_system.entity.task.Task;
+import com.planning_system.entity.user.User;
 import com.planning_system.services.utility.TaskRequestDTOToTaskMapper;
 import com.planning_system.services.utility.TaskToTaskResponseDTOMapper;
 import com.planning_system.services.utility.TaskUtil;
@@ -52,8 +53,24 @@ public class TaskCommandService {
         return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(taskResult);
     }
 
+    /**
+     * Method assign a {@link Task} to {@link User}
+     * @param taskId that will be assigned
+     * @param userId that the task will be assigned to
+     * @return {@link TaskResponseDTO}
+     */
     public TaskResponseDTO assignTaskToUser(int taskId, int userId) {
         var task = taskService.assignTaskToUser(taskId, userId);
+        return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(task);
+    }
+
+    /**
+     * Method removes a User assignment from a {@link Task}
+     * @param taskId of the Task to remove the assignment from
+     * @return {@link TaskResponseDTO}
+     */
+    public TaskResponseDTO removeUserAssignment(int taskId) {
+        var task = taskService.removeUserAssignment(taskId);
         return taskToTaskResponseDTOMapper.mapToTaskResponseDTO(task);
     }
 

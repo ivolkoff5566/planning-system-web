@@ -34,11 +34,6 @@ public class TaskController {
         return taskCommandService.createTask(taskRequestDTO);
     }
 
-    @PostMapping("/{taskId}/user/{userId}")
-    public TaskResponseDTO assignTaskToUser(@PathVariable int taskId,
-                                            @PathVariable int userId) {
-        return taskCommandService.assignTaskToUser(taskId, userId);
-    }
 
     @GetMapping("/{id}")
     public TaskResponseDTO getTaskById(@PathVariable int id) {
@@ -54,6 +49,17 @@ public class TaskController {
     public TaskResponseDTO updateTask(@PathVariable int id,
                                       @RequestBody TaskRequestDTO taskRequestDTO) {
         return taskCommandService.updateTask(id, taskRequestDTO);
+    }
+
+    @PutMapping("/{taskId}/assign/{userId}")
+    public TaskResponseDTO assignTaskToUser(@PathVariable int taskId,
+                                            @PathVariable int userId) {
+        return taskCommandService.assignTaskToUser(taskId, userId);
+    }
+
+    @PutMapping("/{taskId}/unassign")
+    public TaskResponseDTO removeUserAssignment(@PathVariable int taskId) {
+        return taskCommandService.removeUserAssignment(taskId);
     }
 
     @DeleteMapping("/{id}")

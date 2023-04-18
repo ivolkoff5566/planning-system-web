@@ -64,6 +64,14 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    public Task removeUserAssignment(int taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND));
+
+        task.setUser(null);
+        return taskRepository.save(task);
+    }
+
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
