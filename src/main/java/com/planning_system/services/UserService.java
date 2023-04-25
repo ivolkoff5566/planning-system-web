@@ -1,7 +1,10 @@
 package com.planning_system.services;
 
+import com.planning_system.controller.user.dto.BasicUserResponseDTO;
 import com.planning_system.entity.user.User;
 import com.planning_system.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,8 @@ import static com.planning_system.services.messages.ServiceErrorMessages.USER_NO
 @Service
 public class UserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepository;
 
     @Autowired
@@ -25,8 +30,10 @@ public class UserService {
 
     public User createUser(User user) {
         if (Objects.isNull(user.getUserName())) {
+            LOGGER.error(NO_USER_NAME_ENTERED);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_USER_NAME_ENTERED);
         }
+        LOGGER.info("Creating new user: {}", user);
         return userRepository.save(user);
     }
 
@@ -39,8 +46,16 @@ public class UserService {
                              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
     }
 
+    public BasicUserResponseDTO getBasicUser(int id) {
+        var user = getUser(id);
+        return BasicUserResponseDTO.builder()
+                                   .id(user.getId())
+                                   .userName(user.getUserName())
+                                   .build();
+    }
+
     public User updateUser(int id, User user) {
-        User userToUpdate = getUser(id);
+        var userToUpdate = getUser(id);
         if (Objects.nonNull(user.getUserName())) {
             userToUpdate.setUserName(user.getUserName());
         }
@@ -49,7 +64,7 @@ public class UserService {
     }
 
     public User deleteUser(int id) {
-        User user = getUser(id);
+        var user = getUser(id);
         user.getTasks().forEach(t -> t.setUser(null));
         userRepository.delete(user);
         return user;

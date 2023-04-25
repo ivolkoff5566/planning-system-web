@@ -1,5 +1,7 @@
 package com.planning_system.entity.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.planning_system.entity.task.Task;
 import lombok.AllArgsConstructor;
@@ -34,5 +36,6 @@ public class User {
     private String userName;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonManagedReference
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Task> tasks = new ArrayList<>();
 }

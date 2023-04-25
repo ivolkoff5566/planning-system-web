@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="DEV_HOME" value="./logs"/>
+    <property name="APP_NAME" value="planning-system-web"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEV_HOME}/${APP_NAME}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${DEV_HOME}/archived/${APP_NAME}-log.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="SPRING_DATA_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${DEV_HOME}/spring-data-jpa.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_HIBERNATE" class="ch.qos.logback.core.FileAppender">
+        <file>${DEV_HOME}/hibernate.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="USER_SERVICE_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${DEV_HOME}/user-service.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="TASK_SERVICE_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${DEV_HOME}/task-service.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="TASK_SYNC_SERVICE_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${DEV_HOME}/task-sync-service.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="REST_APPENDER" class="ch.qos.logback.core.FileAppender">
+        <file>logs/api-rest.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.hibernate.SQL" level="DEBUG">
+        <appender-ref ref="FILE_HIBERNATE"/>
+    </logger>
+
+    <logger name="org.springframework.data" level="DEBUG">
+        <appender-ref ref="SPRING_DATA_FILE"/>
+    </logger>
+
+    <logger name="com.planning_system" level="info" additivity="false">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.planning_system.services.UserService" level="info" additivity="false">
+        <appender-ref ref="USER_SERVICE_FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.planning_system.services.TaskService" level="info" additivity="false">
+        <appender-ref ref="TASK_SERVICE_FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.planning_system.services.sync.TaskSyncService" level="info" additivity="false">
+        <appender-ref ref="TASK_SYNC_SERVICE_FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="INFO">
+        <appender-ref ref="REST_APPENDER"/>
+    </logger>
+
+    <logger name="org.springframework.web" level="DEBUG">
+        <appender-ref ref="REST_APPENDER"/>
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

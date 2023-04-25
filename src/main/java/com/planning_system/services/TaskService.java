@@ -6,6 +6,8 @@ import com.planning_system.entity.task.TaskStatus;
 import com.planning_system.entity.user.User;
 import com.planning_system.repository.TaskRepository;
 import com.planning_system.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ import static com.planning_system.services.messages.ServiceErrorMessages.USER_NO
 @Service
 public class TaskService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
+
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
@@ -42,15 +46,19 @@ public class TaskService {
         }
         if (Objects.isNull(task.getDescription())) {
             task.setDescription("default description");
+            LOGGER.info("No description provided, using default value");
         }
         if (Objects.isNull(task.getStatus())) {
             task.setStatus(TaskStatus.TODO);
+            LOGGER.info("No Task status provided, using default value");
         }
         if (Objects.isNull(task.getPriority())) {
             task.setPriority(TaskPriority.LOW);
+            LOGGER.info("No Task priority provided, using default value");
         }
 
         task.setDate(Instant.now());
+        LOGGER.info("Creating a new task: {}", task);
         return taskRepository.save(task);
     }
 
@@ -60,6 +68,7 @@ public class TaskService {
         User user = userRepository.findById(userId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,USER_NOT_FOUND));
 
+        LOGGER.info("Assigning Task {} to User {}", task, user);
         task.setUser(user);
         return taskRepository.save(task);
     }
@@ -67,7 +76,7 @@ public class TaskService {
     public Task removeUserAssignment(int taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND));
-
+        LOGGER.info("Removing user assignment from Task {}", task);
         task.setUser(null);
         return taskRepository.save(task);
     }
@@ -85,9 +94,11 @@ public class TaskService {
         Task taskToUpdate = getTask(id);
         if (Objects.nonNull(task.getStatus())) {
             taskToUpdate.setStatus(task.getStatus());
+            LOGGER.info("Updating Task status, new values: {}", task.getStatus());
         }
         if (Objects.nonNull(task.getDescription())) {
             taskToUpdate.setDescription(task.getDescription());
+            LOGGER.info("Updating Task description, new values: {}", task.getDescription());
         }
 
         return taskRepository.save(taskToUpdate);

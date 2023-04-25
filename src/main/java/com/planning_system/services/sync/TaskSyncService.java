@@ -1,13 +1,12 @@
 package com.planning_system.services.sync;
 
 import com.planning_system.repository.TaskRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * The class responsible for synchronization of the Tasks.
@@ -18,18 +17,16 @@ import java.util.concurrent.ScheduledExecutorService;
 @Component
 public class TaskSyncService {
 
-//    @Value("${sync.interval}")
-//    private long syncInterval;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskSyncService.class);
+
     @Value("${task.past.due.time}")
     private long pastDueTime;
 
     private final TaskRepository repository;
-    private final ScheduledExecutorService executorService;
 
     @Autowired
     public TaskSyncService(final TaskRepository repository) {
         this.repository = repository;
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Scheduled(fixedDelayString = "${sync.interval}")
@@ -37,15 +34,13 @@ public class TaskSyncService {
         runSyncTask();
     }
 
-    public void stopSync() {
-        executorService.shutdown();
-    }
-
-    private void runSyncTask() {
+    public void runSyncTask() {
+        LOGGER.info("Starting Task sync. Past due time: {} ms", pastDueTime);
         repository.getAllTasksPastDue(pastDueTime)
                 .forEach(task -> {
                     task.setRejected(true);
                     repository.save(task);
                 });
+        LOGGER.info("Task sync has been finished");
     }
 }
