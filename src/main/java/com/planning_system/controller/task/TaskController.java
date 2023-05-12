@@ -3,6 +3,7 @@ package com.planning_system.controller.task;
 import com.planning_system.controller.task.dto.TaskRequestDTO;
 import com.planning_system.controller.task.dto.TaskResponseDTO;
 import com.planning_system.services.TaskCommandService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,15 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/tasks")
 public class TaskController {
 
     private final TaskCommandService taskCommandService;
-
-    @Autowired
-    public TaskController(final TaskCommandService taskCommandService) {
-        this.taskCommandService = taskCommandService;
-    }
 
     @PostMapping
     public TaskResponseDTO createTask(@RequestBody TaskRequestDTO taskRequestDTO) {
@@ -41,7 +38,7 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponseDTO> getAllTasks(@RequestParam Map<String, String> params) {
+    public List<TaskResponseDTO> getAllTasks(@RequestParam(required = false) Map<String, String> params) {
         return taskCommandService.getAllTasks(params);
     }
 

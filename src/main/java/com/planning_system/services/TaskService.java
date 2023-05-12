@@ -6,9 +6,9 @@ import com.planning_system.entity.task.TaskStatus;
 import com.planning_system.entity.user.User;
 import com.planning_system.repository.TaskRepository;
 import com.planning_system.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,19 +26,13 @@ import static com.planning_system.services.messages.ServiceErrorMessages.USER_NO
  * Some methods may also perform data validation.
  */
 @Service
+@RequiredArgsConstructor
 public class TaskService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    public TaskService(final TaskRepository taskRepository,
-                       final UserRepository userRepository) {
-        this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
-    }
 
     public Task createTask(Task task) {
         if (Objects.isNull(task.getName())) {

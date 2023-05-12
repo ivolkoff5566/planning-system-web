@@ -7,7 +7,7 @@ import com.planning_system.entity.user.User;
 import com.planning_system.services.utility.TaskRequestDTOToTaskMapper;
 import com.planning_system.services.utility.TaskToTaskResponseDTOMapper;
 import com.planning_system.services.utility.TaskUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,20 +27,12 @@ import static com.planning_system.services.messages.ServiceErrorMessages.TASK_NO
  * and preparing data for response (filtering, sorting etc.)
  */
 @Service
+@RequiredArgsConstructor
 public class TaskCommandService {
 
     private final TaskService taskService;
     private final TaskToTaskResponseDTOMapper taskToTaskResponseDTOMapper;
     private final TaskRequestDTOToTaskMapper taskRequestDTOToTaskMapper;
-
-    @Autowired
-    public TaskCommandService(final TaskService taskService,
-                              final TaskToTaskResponseDTOMapper taskToTaskResponseDTOMapper,
-                              final TaskRequestDTOToTaskMapper taskRequestDTOToTaskMapper) {
-        this.taskService = taskService;
-        this.taskToTaskResponseDTOMapper = taskToTaskResponseDTOMapper;
-        this.taskRequestDTOToTaskMapper = taskRequestDTOToTaskMapper;
-    }
 
     /**
      * Method creates a new {@link Task}

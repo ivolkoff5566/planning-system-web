@@ -15,20 +15,16 @@ public class TaskUtil {
 
     public static Comparator<Task> getTaskComparatorFromParams(Map<String, String> params) {
         Comparator<Task> comp;
+        String reverseSorted = params.get(REVERSE_SORT);
+
         if (!params.isEmpty() && !Objects.isNull(params.get(SORTED_BY))) {
-            String reverseSorted = params.get(REVERSE_SORT);
-            if (!Objects.isNull(reverseSorted) && reverseSorted.equals(Boolean.TRUE.toString())) {
-                comp = getComparator(params.get(SORTED_BY)).reversed();
-            } else {
-                comp = getComparator(params.get(SORTED_BY));
-            }
+            comp = getComparator(params.get(SORTED_BY));
         } else {
-            String reverseSorted = params.get(REVERSE_SORT);
-            if (!Objects.isNull(reverseSorted) && reverseSorted.equals(Boolean.TRUE.toString())) {
-                comp = getComparator(ID).reversed();
-            } else {
-                comp = getComparator(ID);
-            }
+            comp = getComparator(ID);
+        }
+
+        if (!Objects.isNull(reverseSorted) && reverseSorted.equals(Boolean.TRUE.toString())) {
+            comp = getComparator(ID).reversed();
         }
 
         return comp;

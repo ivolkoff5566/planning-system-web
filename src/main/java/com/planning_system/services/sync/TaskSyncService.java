@@ -1,9 +1,9 @@
 package com.planning_system.services.sync;
 
 import com.planning_system.repository.TaskRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
+@RequiredArgsConstructor
 public class TaskSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskSyncService.class);
@@ -23,11 +24,6 @@ public class TaskSyncService {
     private long pastDueTime;
 
     private final TaskRepository repository;
-
-    @Autowired
-    public TaskSyncService(final TaskRepository repository) {
-        this.repository = repository;
-    }
 
     @Scheduled(fixedDelayString = "${sync.interval}")
     public void startSync() {

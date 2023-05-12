@@ -3,9 +3,9 @@ package com.planning_system.services;
 import com.planning_system.controller.user.dto.BasicUserResponseDTO;
 import com.planning_system.entity.user.User;
 import com.planning_system.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,16 +17,12 @@ import static com.planning_system.services.messages.ServiceErrorMessages.NO_USER
 import static com.planning_system.services.messages.ServiceErrorMessages.USER_NOT_FOUND;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserService(final UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     public User createUser(User user) {
         if (Objects.isNull(user.getUserName())) {

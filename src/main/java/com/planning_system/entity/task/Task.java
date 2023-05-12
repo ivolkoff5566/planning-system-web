@@ -1,13 +1,12 @@
 package com.planning_system.entity.task;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.planning_system.entity.user.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,7 +39,7 @@ public class Task {
      @Enumerated(EnumType.STRING)
      private TaskPriority priority;
      @ManyToOne
-     @JsonBackReference
+     @JsonIgnoreProperties("tasks")
      @JoinColumn(name = "user_id")
      private User user;
      @Column(name = "is_rejected")

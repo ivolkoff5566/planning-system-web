@@ -2,7 +2,7 @@ package com.planning_system.controller.user;
 
 import com.planning_system.entity.user.User;
 import com.planning_system.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,15 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
-
-    @Autowired
-    public UserController(final UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping
     public User createTask(@RequestBody User user) {
@@ -38,7 +34,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable int id,
-                            @RequestParam boolean includeTask) {
+                            @RequestParam(required = false) boolean includeTask) {
         if (includeTask) {
             return userService.getUser(id);
         }

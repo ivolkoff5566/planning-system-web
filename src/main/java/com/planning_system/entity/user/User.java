@@ -1,9 +1,8 @@
 package com.planning_system.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.planning_system.entity.task.Task;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,10 +21,10 @@ import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "users")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -35,7 +34,6 @@ public class User {
     @Column(name = "user_name")
     private String userName;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonManagedReference
-//    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties("user")
     private List<Task> tasks = new ArrayList<>();
 }
