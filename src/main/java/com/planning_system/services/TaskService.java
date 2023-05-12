@@ -4,8 +4,10 @@ import com.planning_system.entity.task.Task;
 import com.planning_system.entity.task.TaskPriority;
 import com.planning_system.entity.task.TaskStatus;
 import com.planning_system.entity.user.User;
+import com.planning_system.entity.user_statistics.UserStatistics;
 import com.planning_system.repository.TaskRepository;
 import com.planning_system.repository.UserRepository;
+import com.planning_system.repository.UserStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,7 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final UserStatisticsRepository userStatisticsRepository;
 
     public Task createTask(Task task) {
         if (Objects.isNull(task.getName())) {
@@ -64,6 +67,14 @@ public class TaskService {
 
         LOGGER.info("Assigning Task {} to User {}", task, user);
         task.setUser(user);
+        var stat = userStatisticsRepository.findByUserId(userId);
+        if (Objects.isNull(stat)) {
+            stat = UserStatistics.builder().build();
+            stat.setUserId(userId);
+        }
+        stat.setAssignedTaskCount(stat.getAssignedTaskCount() + 1);
+        userStatisticsRepository.save(stat);
+
         return taskRepository.save(task);
     }
 

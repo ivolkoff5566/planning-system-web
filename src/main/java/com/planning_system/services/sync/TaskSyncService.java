@@ -27,7 +27,7 @@ public class TaskSyncService {
 
     @Scheduled(fixedDelayString = "${sync.interval}")
     public void startSync() {
-        runSyncTask();
+        //runSyncTask();
     }
 
     public void runSyncTask() {
