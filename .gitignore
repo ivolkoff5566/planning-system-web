@@ -4,6 +4,7 @@ target/
 
 # Log file
 *.log
+logs/
 
 # Idea files
 .idea

@@ -1,37 +1,30 @@
 package com.planning_system.services;
 
-import com.planning_system.repository.RejectedTaskRepository;
-import com.planning_system.repository.TaskRepository;
 import com.planning_system.services.sync.TaskSyncService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
-import static org.mockito.Mockito.mock;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@TestPropertySource(locations = "classpath:test.properties")
 public class TaskSyncServiceTests {
 
-    private final TaskRepository taskRepository = mock(TaskRepository.class);
-    private final RejectedTaskRepository rejectedTaskRepository = mock(RejectedTaskRepository.class);
-
-    private final TaskSyncService taskSyncService = new TaskSyncService(taskRepository,
-                                                                        rejectedTaskRepository,
-                                                                        1,
-                                                                        30);
+    @SpyBean
+    private TaskSyncService taskSyncService;
 
     @Test
-    public void testStartSync() throws InterruptedException {
-        taskSyncService.startSync();
-        CountDownLatch latch = new CountDownLatch(2);
-
-        Executors.newSingleThreadScheduledExecutor().schedule(latch::countDown, 2, TimeUnit.SECONDS);
-        Executors.newSingleThreadScheduledExecutor().schedule(latch::countDown, 2, TimeUnit.SECONDS);
-        latch.await();
-
-        verify(taskRepository, times(3)).getAllTasksPastDue(30L);
+    public void taskSyncSchedulerTest() {
+        await().atMost(Duration.ofSeconds(3))
+                .untilAsserted(() -> verify(taskSyncService, times(3)).runSyncTask());
     }
 }
