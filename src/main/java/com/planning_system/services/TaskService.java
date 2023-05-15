@@ -3,7 +3,6 @@ package com.planning_system.services;
 import com.planning_system.entity.task.Task;
 import com.planning_system.entity.task.TaskPriority;
 import com.planning_system.entity.task.TaskStatus;
-import com.planning_system.entity.user.User;
 import com.planning_system.entity.user_statistics.UserStatistics;
 import com.planning_system.repository.TaskRepository;
 import com.planning_system.repository.UserRepository;
@@ -60,19 +59,23 @@ public class TaskService {
     }
 
     public Task assignTaskToUser(int taskId, int userId) {
-        Task task = taskRepository.findById(taskId)
+        var task = taskRepository.findById(taskId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND));
-        User user = userRepository.findById(userId)
+        var user = userRepository.findById(userId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,USER_NOT_FOUND));
 
+        if (Objects.nonNull(task.getUser()) && task.getUser().getId() == userId) {
+            return task;
+        }
         LOGGER.info("Assigning Task {} to User {}", task, user);
         task.setUser(user);
+
         var stat = userStatisticsRepository.findByUserId(userId);
         if (Objects.isNull(stat)) {
-            stat = UserStatistics.builder().build();
-            stat.setUserId(userId);
+            stat = UserStatistics.builder().userId(userId).build();
         }
-        stat.setAssignedTaskCount(stat.getAssignedTaskCount() + 1);
+        var assignedCount = stat.getAssignedTaskCount();
+        stat.setAssignedTaskCount(++assignedCount);
         userStatisticsRepository.save(stat);
 
         return taskRepository.save(task);
@@ -82,6 +85,15 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,TASK_NOT_FOUND));
         LOGGER.info("Removing user assignment from Task {}", task);
+
+        var user = task.getUser();
+        if (!Objects.isNull(user)) {
+            var stat = userStatisticsRepository.findByUserId(user.getId());
+            var assignedCount = stat.getAssignedTaskCount();
+            stat.setAssignedTaskCount(--assignedCount);
+            userStatisticsRepository.save(stat);
+        }
+
         task.setUser(null);
         return taskRepository.save(task);
     }
@@ -98,12 +110,23 @@ public class TaskService {
     public Task updateTask(int id, Task task) {
         Task taskToUpdate = getTask(id);
         if (Objects.nonNull(task.getStatus())) {
-            taskToUpdate.setStatus(task.getStatus());
-            LOGGER.info("Updating Task status, new values: {}", task.getStatus());
+            var status = task.getStatus();
+            taskToUpdate.setStatus(status);
+            LOGGER.info("Updating Task status, new value: {}", status);
+
+            if (status.equals(TaskStatus.COMPLETED) && Objects.nonNull(taskToUpdate.getUser())) {
+                var userId = taskToUpdate.getUser().getId();
+                var stat = userStatisticsRepository.findByUserId(userId);
+                var completedCount = stat.getCompletedTaskCount();
+                stat.setCompletedTaskCount(++completedCount);
+                userStatisticsRepository.save(stat);
+                LOGGER.info("User {} completed Task {}", userId, taskToUpdate.getId());
+            }
         }
+
         if (Objects.nonNull(task.getDescription())) {
             taskToUpdate.setDescription(task.getDescription());
-            LOGGER.info("Updating Task description, new values: {}", task.getDescription());
+            LOGGER.info("Updating Task description, new value: {}", task.getDescription());
         }
 
         return taskRepository.save(taskToUpdate);
