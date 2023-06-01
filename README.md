@@ -3,7 +3,7 @@
 The Planning system service works as a console application. The main functionality includes creating, updating and deleting Tasks.
 
 Each task has the following properties:
-1. ID - a digit, will be added for each task after creation. Increases subsequently
+1. Id - a digit, will be added for each task after creation. Increases subsequently
 2. Name - name of the task
 3. Description - description of the task
 4. Date - date/time when a task was created
