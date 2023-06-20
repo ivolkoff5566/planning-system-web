@@ -5,6 +5,7 @@ import com.planning_system.entity.task.TaskPriority;
 import com.planning_system.entity.task.TaskStatus;
 import com.planning_system.repository.TaskRepository;
 import com.planning_system.repository.UserRepository;
+import com.planning_system.repository.UserStatisticsRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,8 @@ public class TaskServiceTests {
 
     private final TaskRepository taskRepository = mock(TaskRepository.class);
     private final UserRepository userRepository = mock(UserRepository.class);
-    private final TaskService taskService = new TaskService(taskRepository, userRepository);
+    private final UserStatisticsRepository userStatisticsRepository = mock(UserStatisticsRepository.class);
+    private final TaskService taskService = new TaskService(taskRepository, userRepository, userStatisticsRepository);
 
     @Test
     public void createTaskWithDefaultFieldsTest() {

@@ -1,12 +1,15 @@
 package com.planning_system.services.sync;
 
 import com.planning_system.repository.TaskRepository;
+import com.planning_system.repository.UserStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * The class responsible for synchronization of the Tasks.
@@ -19,11 +22,10 @@ import org.springframework.stereotype.Component;
 public class TaskSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskSyncService.class);
-
+    private final TaskRepository repository;
+    private final UserStatisticsRepository userStatisticsRepository;
     @Value("${task.past.due.time}")
     private long pastDueTime;
-
-    private final TaskRepository repository;
 
     @Scheduled(fixedDelayString = "${sync.interval}")
     public void startSync() {
@@ -33,10 +35,20 @@ public class TaskSyncService {
     public void runSyncTask() {
         LOGGER.info("Starting Task sync. Past due time: {} ms", pastDueTime);
         repository.getAllTasksPastDue(pastDueTime)
-                .forEach(task -> {
-                    task.setRejected(true);
-                    repository.save(task);
-                });
+                  .stream()
+                  .filter(task -> !task.isRejected())
+                  .forEach(task -> {
+                      if (Objects.nonNull(task.getUser())) {
+                          var userId = task.getUser()
+                                           .getId();
+                          var stat = userStatisticsRepository.findByUserId(userId);
+                          var rejectedCount = stat.getRejectedTaskCount();
+                          stat.setRejectedTaskCount(++rejectedCount);
+                          userStatisticsRepository.save(stat);
+                      }
+                      task.setRejected(true);
+                      repository.save(task);
+                  });
         LOGGER.info("Task sync has been finished");
     }
 }
